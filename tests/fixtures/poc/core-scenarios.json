@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0.0",
+  "fixture_set": "pinchd-poc-core",
+  "classification": "synthetic-only",
+  "seed": 20261022,
+  "clock": "2026-10-22T12:00:00Z",
+  "locale": "en-GB",
+  "timezone": "UTC",
+  "notice": "Fictional test records only. Never submit to live providers or production systems.",
+  "accounts": [
+    {"id":"acct-001","state":"active","age_gate":"verified_test_state","profile":"profile-001"},
+    {"id":"acct-002","state":"active","age_gate":"verified_test_state","profile":"profile-002"},
+    {"id":"acct-003","state":"active","age_gate":"verified_test_state","profile":"profile-003"},
+    {"id":"acct-004","state":"paused","age_gate":"verified_test_state","profile":"profile-004"},
+    {"id":"acct-005","state":"active","age_gate":"pending","profile":"profile-005"},
+    {"id":"acct-006","state":"deletion_pending","age_gate":"verified_test_state","profile":"profile-006"},
+    {"id":"acct-007","state":"active","age_gate":"expired","profile":"profile-007"},
+    {"id":"acct-008","state":"suspended","age_gate":"verified_test_state","profile":"profile-008"}
+  ],
+  "profiles": [
+    {"id":"profile-001","account_id":"acct-001","relationship_goal":"long_term","open_to":["long_term"],"gender_identity":"woman_test_enum","discovery_genders":["man_test_enum"],"hard_age_min":25,"hard_age_max":40,"hard_radius_km":25,"location_cell":"test-cell-a","published":true},
+    {"id":"profile-002","account_id":"acct-002","relationship_goal":"long_term","open_to":["long_term"],"gender_identity":"man_test_enum","discovery_genders":["woman_test_enum"],"hard_age_min":25,"hard_age_max":40,"hard_radius_km":25,"location_cell":"test-cell-a","published":true},
+    {"id":"profile-003","account_id":"acct-003","relationship_goal":"not_sure_yet","open_to":[],"gender_identity":"man_test_enum","discovery_genders":["woman_test_enum"],"hard_age_min":18,"hard_age_max":29,"hard_radius_km":10,"location_cell":"test-cell-b","published":true},
+    {"id":"profile-004","account_id":"acct-004","relationship_goal":"casual","open_to":["short_term"],"gender_identity":"woman_test_enum","discovery_genders":["man_test_enum"],"hard_age_min":18,"hard_age_max":45,"hard_radius_km":30,"location_cell":"test-cell-a","published":true},
+    {"id":"profile-005","account_id":"acct-005","relationship_goal":"long_term","open_to":["long_term"],"gender_identity":"woman_test_enum","discovery_genders":["man_test_enum"],"hard_age_min":21,"hard_age_max":40,"hard_radius_km":20,"location_cell":"test-cell-a","published":true},
+    {"id":"profile-006","account_id":"acct-006","relationship_goal":"long_term","open_to":["long_term"],"gender_identity":"man_test_enum","discovery_genders":["woman_test_enum"],"hard_age_min":21,"hard_age_max":40,"hard_radius_km":20,"location_cell":"test-cell-a","published":true},
+    {"id":"profile-007","account_id":"acct-007","relationship_goal":"short_term","open_to":["short_term"],"gender_identity":"woman_test_enum","discovery_genders":["man_test_enum"],"hard_age_min":21,"hard_age_max":40,"hard_radius_km":20,"location_cell":"test-cell-a","published":true},
+    {"id":"profile-008","account_id":"acct-008","relationship_goal":"long_term","open_to":["long_term"],"gender_identity":"man_test_enum","discovery_genders":["woman_test_enum"],"hard_age_min":21,"hard_age_max":40,"hard_radius_km":20,"location_cell":"test-cell-a","published":true}
+  ],
+  "relationships": [
+    {"id":"rel-001","type":"like","from":"acct-001","to":"acct-002","state":"active"},
+    {"id":"rel-002","type":"like","from":"acct-002","to":"acct-001","state":"active"},
+    {"id":"rel-003","type":"block","from":"acct-001","to":"acct-003","state":"active"},
+    {"id":"rel-004","type":"unmatch_suppression","pair":["acct-001","acct-004"],"state":"active"},
+    {"id":"rel-005","type":"like","from":"acct-001","to":"acct-005","state":"active"},
+    {"id":"rel-006","type":"like","from":"acct-001","to":"acct-006","state":"active"}
+  ],
+  "provider_events": [
+    {"id":"evt-001","provider":"age_assurance_fake","account_id":"acct-005","workflow_version":"local-fake-v1","event":"pending","sequence":2,"signature":"LOCAL_TEST_ONLY"},
+    {"id":"evt-002","provider":"age_assurance_fake","account_id":"acct-005","workflow_version":"local-fake-v1","event":"failed","sequence":1,"signature":"LOCAL_TEST_ONLY"},
+    {"id":"evt-003","provider":"age_assurance_fake","account_id":"acct-006","workflow_version":"local-fake-v1","event":"passed_late","sequence":3,"signature":"LOCAL_TEST_ONLY"}
+  ],
+  "scenarios": [
+    {"id":"SYN-001","name":"reciprocal-like-idempotency","setup":["acct-001 likes acct-002","acct-002 likes acct-001"],"assert":["exactly_one_match","exactly_one_conversation"]},
+    {"id":"SYN-002","name":"hard-gate-block","setup":["acct-001 discovers acct-003"],"assert":["candidate_excluded_due_to_block"]},
+    {"id":"SYN-003","name":"paused-profile-hidden","setup":["acct-004 is paused"],"assert":["no_new_discovery_exposure"],"status":"depends_on_LD-01_confirmation"},
+    {"id":"SYN-004","name":"age-pending-denies","setup":["acct-005 age state is pending"],"assert":["all_age_gated_routes_deny"]},
+    {"id":"SYN-005","name":"late-event-no-resurrection","setup":["acct-006 deletion pending","deliver evt-003"],"assert":["account_not_reactivated","event_audited"]},
+    {"id":"SYN-006","name":"unmatch-pair-exclusion","setup":["acct-001 and acct-004 previously unmatched"],"assert":["pair_never_rematched"],"status":"pair_suppression_policy_approved_but_post_deletion_retention_open"},
+    {"id":"SYN-007","name":"unknown-goal-not-open-minded","setup":["candidate relationship goal is not_sure_yet"],"assert":["unknown_not_inferred_as_open_to_other_goals"]},
+    {"id":"SYN-008","name":"block-before-queued-push","setup":["enqueue notification","block pair","run notification worker"],"assert":["notification_suppressed"]},
+    {"id":"SYN-009","name":"duplicate-provider-callback","setup":["deliver same valid local fake callback twice"],"assert":["single_state_effect","duplicate_audited"]},
+    {"id":"SYN-010","name":"free-incoming-like-window","setup":["seed more than five eligible incoming likes and excluded candidates"],"assert":["five_eligible_unblurred","excluded_candidates_never_displayed"],"status":"five_is_launch_hypothesis_not_empirically_validated"}
+  ],
+  "constraints": {
+    "no_real_person_data": true,
+    "no_live_provider_calls": true,
+    "no_real_notifications": true,
+    "no_production_credentials": true,
+    "no_exact_real_world_coordinates": true,
+    "fixture_generation_is_not_test_evidence": true
+  }
+}

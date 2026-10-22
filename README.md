@@ -9,13 +9,13 @@
 
 Pinchd is organised as a monorepo so the mobile app, admin console, API, shared code, tests, infrastructure, and product research can evolve together without mixing responsibilities.
 
-This scaffold does not lock the team into a final programming language, database, hosting provider, or billing vendor. The `apps/mobile` layout is compatible with a recommended Expo / React Native approach for shared iOS and Android development, but confirm the stack decision before generating application code.
+The current approved direction is Go backend; React Native + Expo + TypeScript for iOS/Android; AWS; PostgreSQL; and private S3 media. See `docs/architecture/decisions/ADR-0001-stack-and-deployment.md`. This is an approved direction, not proof of production readiness: versions, exact AWS services, privacy/security review, cost validation and technical PoCs remain gates. Do not begin mobile UI design until research and design-readiness gates are signed off.
 
 ## Start here
 
 1. `docs/product/` — product principles and links to the existing requirements blueprint.
 2. `docs/architecture/folder-structure.md` — explains every major directory and dependency boundaries.
-3. `docs/architecture/decisions/ADR-0001-stack-and-deployment.md` — decisions still to be made.
+3. `docs/architecture/decisions/ADR-0001-stack-and-deployment.md` — approved stack direction and implementation gates.
 4. `docs/security/` — security and privacy foundations.
 5. `docs/trust-and-safety/` — moderation, reporting, blocking, appeals, and incident-response requirements.
 6. `research/2026-folder-architecture-research.md` — current guidance informing this structure.
